@@ -20,6 +20,8 @@ package ch.securify;
 
 import ch.securify.analysis.AbstractDataflow;
 import ch.securify.analysis.DataflowFactory;
+import ch.securify.analysis.MayImplicitDataflow;
+import ch.securify.analysis.MustExplicitDataflow;
 import ch.securify.decompiler.*;
 import ch.securify.decompiler.instructions.Instruction;
 import ch.securify.decompiler.instructions._VirtualMethodHead;
@@ -32,16 +34,26 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Strings;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.io.*;
 import java.lang.reflect.Modifier;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 import static ch.securify.CompilationHelpers.parseCompilationOutput;
+import static com.google.common.io.Resources.copy;
+import static com.google.common.io.Resources.getResource;
+import static java.util.jar.Attributes.Name.IMPLEMENTATION_VERSION;
+import static java.util.jar.Attributes.Name.MAIN_CLASS;
 
 
 public class Main {
@@ -204,6 +216,23 @@ public class Main {
         updateContractAnalysisStatus(livestatusfile);
     }
 
+
+    private static void extractSouffleBinaries() throws IOException {
+        String[] names = {MustExplicitDataflow.binaryName,MayImplicitDataflow.binaryName };
+        String souffleDir = Files.createTempDirectory("binaries_souffle").toFile().getAbsolutePath();
+        AbstractDataflow.setDlFolder(souffleDir);
+        for(String resourceName : names) {
+            File binaryPath = Paths.get(souffleDir, resourceName).toFile();
+            OutputStream os = new FileOutputStream(binaryPath);
+            copy(getResource(resourceName), os);
+            os.close();
+            if (!binaryPath.setExecutable(true)) {
+                throw new IOException("Could not set the executable bit of a souffle binary in " + souffleDir);
+            }
+        }
+    }
+
+
     public static void main(String[] rawrgs) throws IOException, InterruptedException {
         args = new Args();
 
@@ -214,6 +243,8 @@ public class Main {
             new JCommander(args).usage();
             return;
         }
+
+        extractSouffleBinaries();
 
         if (args.descriptions && !args.jsonOutput) {
             throw new ParameterException("--descriptions requires --json");

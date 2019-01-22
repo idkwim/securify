@@ -72,9 +72,15 @@ public abstract class AbstractDataflow {
     protected final boolean DEBUG = false;
 
     // input predicates
+    static protected String DL_FOLDER;
     protected String DL_EXEC;
     private String WORKSPACE, WORKSPACE_OUT;
     private final String SOUFFLE_BIN = "souffle";
+    static final public String binaryName = "";
+
+    static public void setDlFolder(String folder) {
+        DL_FOLDER = folder;
+    }
 
     protected boolean isSouffleInstalled() {
         try {

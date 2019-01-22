@@ -25,16 +25,11 @@ import ch.securify.decompiler.instructions.*;
 
 import ch.securify.decompiler.Variable;
 
-/**
- * @author andrei
- *
- */
 public class MustExplicitDataflow extends AbstractDataflow {
-
-    public MustExplicitDataflow(){}
+    static final public String binaryName = "mustExplicit";
 
     public MustExplicitDataflow(List<Instruction> decompiledInstructions) throws IOException, InterruptedException {
-        DL_EXEC = "build/mustExplicit";
+        DL_EXEC = DL_FOLDER + "/" + binaryName;
         instructions = decompiledInstructions;
         initDataflow();
     }
