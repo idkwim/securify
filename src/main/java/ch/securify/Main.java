@@ -216,7 +216,32 @@ public class Main {
         updateContractAnalysisStatus(livestatusfile);
     }
 
+    /**
+     * Get the Securify version from the MANIFEST
+     *
+     * @return The version of Securify being executed
+     * @throws IOException
+     */
+    private static String getVersion() throws IOException {
+        String className = Main.class.getCanonicalName();
+        Enumeration<URL> resources = Main.class.getClassLoader()
+                .getResources("META-INF/MANIFEST.MF");
+        while (resources.hasMoreElements()) {
+            Manifest manifest = new Manifest(resources.nextElement().openStream());
+            Attributes at = manifest.getMainAttributes();
+            Object main = at.getValue(MAIN_CLASS);
+            if (main != null && at.getValue(MAIN_CLASS).equals(className) ) {
+                return at.getValue(IMPLEMENTATION_VERSION);
+            }
+        }
+        throw new RuntimeException("Version not found");
+    }
 
+    /**
+     * Extract the Soufflé binaries and store them in a temporary folder to allow them to be executed
+     *
+     * @throws IOException
+     */
     private static void extractSouffleBinaries() throws IOException {
         String[] names = {MustExplicitDataflow.binaryName,MayImplicitDataflow.binaryName };
         String souffleDir = Files.createTempDirectory("binaries_souffle").toFile().getAbsolutePath();
@@ -244,6 +269,7 @@ public class Main {
             return;
         }
 
+        SolidityResult.setSecurifyVersion(getVersion());
         extractSouffleBinaries();
 
         if (args.descriptions && !args.jsonOutput) {

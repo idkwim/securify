@@ -9,7 +9,22 @@ import java.util.List;
 import java.util.TreeMap;
 
 class SolidityResult {
+    private static String securifyVersion = null;
+    String version;
+
+    static void setSecurifyVersion(String secVersion) {
+        if (securifyVersion != null ) {
+            throw new RuntimeException("Securify version is already specified.");
+        }
+        securifyVersion = secVersion;
+    }
+
     SolidityResult(SecurifyErrors securifyErrors) {
+        if (securifyVersion == null ) {
+            throw new RuntimeException("Securify version unspecified.");
+        }
+
+        this.version = securifyVersion;
         this.securifyErrors = securifyErrors;
     }
 
