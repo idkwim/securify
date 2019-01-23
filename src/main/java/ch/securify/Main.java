@@ -131,7 +131,7 @@ public class Main {
             }
             String map = elt.getValue().getAsJsonObject().get("srcmap-runtime").getAsString();
 
-            List<String> lines = Arrays.asList(bin);
+            List<String> lines = Collections.singletonList(bin);
             File binFile = File.createTempFile("securify_binary_", ".bin.hex");
             binFile.deleteOnExit();
             Files.write(Paths.get(binFile.getPath()), lines);
@@ -181,7 +181,9 @@ public class Main {
         contractResult.decompiled = true;
 
         if (decompilationOutputFile != null) {
-            new File(decompilationOutputFile).getAbsoluteFile().getParentFile().mkdirs();
+            if (new File(decompilationOutputFile).getAbsoluteFile().getParentFile().mkdirs()) {
+                throw new IOException("Error while making directory");
+            }
 
             Variable.setDebug(false);
             Files.write(Paths.get(decompilationOutputFile),
@@ -266,7 +268,9 @@ public class Main {
         if (args.livestatusfile != null) {
             lStatusFile = new File(args.livestatusfile);
             if (lStatusFile.getParentFile() != null) {
-                lStatusFile.getParentFile().mkdirs();
+                if (!lStatusFile.getParentFile().mkdirs()) {
+                    throw new IOException("Error while making directory");
+                }
             }
         } else {
             lStatusFile = File.createTempFile("securify_livestatusfile", "");
@@ -313,7 +317,6 @@ public class Main {
             processHexFile(args.filehex, args.decompoutputfile, livestatusfile);
         } else {
             new JCommander(args).usage();
-            return;
         }
     }
 
