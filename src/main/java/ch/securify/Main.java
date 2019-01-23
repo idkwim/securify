@@ -20,8 +20,6 @@ package ch.securify;
 
 import ch.securify.analysis.AbstractDataflow;
 import ch.securify.analysis.DataflowFactory;
-import ch.securify.analysis.MayImplicitDataflow;
-import ch.securify.analysis.MustExplicitDataflow;
 import ch.securify.decompiler.*;
 import ch.securify.decompiler.instructions.Instruction;
 import ch.securify.decompiler.instructions._VirtualMethodHead;
@@ -50,8 +48,6 @@ import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 import static ch.securify.CompilationHelpers.parseCompilationOutput;
-import static com.google.common.io.Resources.copy;
-import static com.google.common.io.Resources.getResource;
 import static java.util.jar.Attributes.Name.IMPLEMENTATION_VERSION;
 import static java.util.jar.Attributes.Name.MAIN_CLASS;
 
@@ -237,26 +233,6 @@ public class Main {
         throw new RuntimeException("Version not found");
     }
 
-    /**
-     * Extract the Soufflé binaries and store them in a temporary folder to allow them to be executed
-     *
-     * @throws IOException
-     */
-    private static void extractSouffleBinaries() throws IOException {
-        String[] names = {MustExplicitDataflow.binaryName,MayImplicitDataflow.binaryName };
-        String souffleDir = Files.createTempDirectory("binaries_souffle").toFile().getAbsolutePath();
-        AbstractDataflow.setDlFolder(souffleDir);
-        for(String resourceName : names) {
-            File binaryPath = Paths.get(souffleDir, resourceName).toFile();
-            OutputStream os = new FileOutputStream(binaryPath);
-            copy(getResource(resourceName), os);
-            os.close();
-            if (!binaryPath.setExecutable(true)) {
-                throw new IOException("Could not set the executable bit of a souffle binary in " + souffleDir);
-            }
-        }
-    }
-
 
     public static void main(String[] rawrgs) throws IOException, InterruptedException {
         args = new Args();
@@ -270,7 +246,6 @@ public class Main {
         }
 
         SolidityResult.setSecurifyVersion(getVersion());
-        extractSouffleBinaries();
 
         if (args.descriptions && !args.jsonOutput) {
             throw new ParameterException("--descriptions requires --json");

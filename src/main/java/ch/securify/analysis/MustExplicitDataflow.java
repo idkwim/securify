@@ -29,9 +29,8 @@ public class MustExplicitDataflow extends AbstractDataflow {
     static final public String binaryName = "mustExplicit";
 
     public MustExplicitDataflow(List<Instruction> decompiledInstructions) throws IOException, InterruptedException {
-        DL_EXEC = DL_FOLDER + "/" + binaryName;
         instructions = decompiledInstructions;
-        initDataflow();
+        initDataflow(binaryName);
     }
 
     @Override

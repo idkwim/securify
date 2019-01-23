@@ -35,6 +35,9 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.io.Resources.copy;
+import static com.google.common.io.Resources.getResource;
+
 public abstract class AbstractDataflow {
 
     public static final int UNK_CONST_VAL = -1;
@@ -79,7 +82,7 @@ public abstract class AbstractDataflow {
     static final public String binaryName = "";
 
     static public void setDlFolder(String folder) {
-        DL_FOLDER = folder;
+        DL_FOLDER = Objects.requireNonNull(folder);
     }
 
     protected boolean isSouffleInstalled() {
@@ -93,7 +96,33 @@ public abstract class AbstractDataflow {
         }
     }
 
-    protected void initDataflow() throws IOException, InterruptedException {
+    /**
+     * Extract the Soufflé binaries and store them in a temporary folder to allow them to be executed
+     *
+     * @throws IOException
+     */
+    private static void extractSouffleBinaries() throws IOException {
+        String[] names = {MustExplicitDataflow.binaryName, MayImplicitDataflow.binaryName };
+        String souffleDir = Files.createTempDirectory("binaries_souffle").toFile().getAbsolutePath();
+        setDlFolder(souffleDir);
+        for(String resourceName : names) {
+            File binaryPath = Paths.get(souffleDir, resourceName).toFile();
+            OutputStream os = new FileOutputStream(binaryPath);
+            copy(getResource(resourceName), os);
+            os.close();
+            if (!binaryPath.setExecutable(true)) {
+                throw new IOException("Could not set the executable bit of a souffle binary in " + souffleDir);
+            }
+        }
+    }
+
+    protected void initDataflow(String binaryName) throws IOException, InterruptedException {
+        if (DL_FOLDER == null) {
+            extractSouffleBinaries();
+        }
+
+        DL_EXEC = DL_FOLDER + "/" + binaryName;
+
         if (!isSouffleInstalled()) {
             System.err.println("Soufflé does not seem to be installed.");
             System.exit(7);
