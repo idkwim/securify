@@ -75,11 +75,9 @@ public abstract class AbstractDataflow {
     protected final boolean DEBUG = false;
 
     // input predicates
-    static protected String DL_FOLDER;
-    protected String DL_EXEC;
+    private static String DL_FOLDER;
     private String WORKSPACE, WORKSPACE_OUT;
     private final String SOUFFLE_BIN = "souffle";
-    static final public String binaryName = "";
 
     static public void setDlFolder(String folder) {
         DL_FOLDER = Objects.requireNonNull(folder);
@@ -121,7 +119,7 @@ public abstract class AbstractDataflow {
             extractSouffleBinaries();
         }
 
-        DL_EXEC = DL_FOLDER + "/" + binaryName;
+        String DL_EXEC = DL_FOLDER + "/" + binaryName;
 
         if (!isSouffleInstalled()) {
             System.err.println("Soufflé does not seem to be installed.");
