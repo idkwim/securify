@@ -235,6 +235,14 @@ public class Main {
         throw new RuntimeException("Version not found");
     }
 
+    private static void printFile(File f) throws FileNotFoundException {
+        Scanner input = new Scanner(f);
+
+        while (input.hasNextLine()) {
+            System.out.println(input.nextLine());
+        }
+    }
+
 
     public static void main(String[] rawrgs) throws IOException, InterruptedException {
         args = new Args();
@@ -315,6 +323,7 @@ public class Main {
 
         if (args.filehex != null) {
             processHexFile(args.filehex, args.decompoutputfile, livestatusfile);
+            printFile(new File(livestatusfile));
         } else {
             new JCommander(args).usage();
         }
